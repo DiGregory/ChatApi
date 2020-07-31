@@ -1,0 +1,25 @@
+version: "3"
+services:
+  chat-api:
+    build: .
+    command:
+        go run .
+    ports:
+      - "9000:9000"
+    links:
+        - db
+    depends_on:
+        - db
+  db:
+    image:
+       postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - database-data:/var/lib/postgresql/data/
+    environment:
+        POSTGRES_DB: dev
+        POSTGRES_USER: postgres-dev
+        POSTGRES_PASSWORD: 1234
+volumes:
+  database-data:
