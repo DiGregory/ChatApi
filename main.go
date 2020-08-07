@@ -31,6 +31,15 @@ func (a apiApp) CreateHandlers(addr string, s *storage.ChatStorage) (error) {
 	r.Post("/chats/add", func(w http.ResponseWriter, r *http.Request) {
 		controllers.AddChat(w, r, s)
 	})
+	r.Post("/messages/add", func(w http.ResponseWriter, r *http.Request) {
+		controllers.AddMessage(w, r, s)
+	})
+	r.Get("/chats/get", func(w http.ResponseWriter, r *http.Request) {
+		controllers.GetChats(w, r, s)
+	})
+	r.Get("/messages/get", func(w http.ResponseWriter, r *http.Request) {
+		controllers.GetMessages(w, r, s)
+	})
 	fmt.Println("Server started at: ", addr)
 	return http.ListenAndServe(addr, r)
 }
