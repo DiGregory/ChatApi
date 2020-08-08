@@ -9,6 +9,7 @@ import (
 	"errors"
 	"strconv"
 	"sort"
+	"github.com/lib/pq"
 )
 
 type ChatStorage struct {
@@ -209,23 +210,38 @@ func (s *ChatStorage) GetChats(rawUser []byte) ([]Chat, error) {
 		userChats = append(userChats, userChat)
 	}
 
-	chats := make([]Chat, 0)
+	//chats := make([]Chat, 0)
+	var ids []int
 	for _, v := range userChats {
-		var c Chat
+
 		cid, err := strconv.Atoi(v.ChatID)
 		if err != nil {
 			return nil, err
 		}
-		chatRow := s.DB.QueryRow("SELECT * FROM chats WHERE id=$1;", cid)
-		err = chatRow.Scan(&c.ID, &c.Name, &c.CreatedAt)
+		ids = append(ids, cid)
+	}
+	//	chatRow := s.DB.QueryRow("SELECT * FROM chats WHERE id=$1;", cid)
+	//	err = chatRow.Scan(&c.ID, &c.Name, &c.CreatedAt)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	chats = append(chats, c)
+	//}
+	chats := make([]Chat, 0)
+	chatRows, err := s.DB.Query("SELECT * FROM chats WHERE id = ANY($1) ORDER BY (SELECT created_at FROM messages WHERE chat_id=chats.id ORDER by created_at DESC LIMIT 1) DESC;", pq.Array(ids))
+	if err != nil {
+		return nil, err
+	}
+	defer chatRows.Close()
+	for chatRows.Next() {
+		var c Chat
+		err := chatRows.Scan(&c.ID, &c.Name, &c.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
 		chats = append(chats, c)
 	}
-	sort.Slice(chats, func(i, j int) bool {
-		return chats[i].CreatedAt.After(*chats[j].CreatedAt)
-	})
+
 	//get users id
 	for i, v := range chats {
 		chatRows, err := s.DB.Query("SELECT (user_id) FROM user_chats WHERE chat_id=$1;", v.ID)
