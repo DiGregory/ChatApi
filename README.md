@@ -1,9 +1,9 @@
 # Запуск
-    ```
+
     docker-compose build
 
     docker-compose up
-    ```
+
 
 
 # Тестовое задание на позицию стажера-бекендера
