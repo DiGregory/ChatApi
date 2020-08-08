@@ -210,7 +210,6 @@ func (s *ChatStorage) GetChats(rawUser []byte) ([]Chat, error) {
 		userChats = append(userChats, userChat)
 	}
 
-	//chats := make([]Chat, 0)
 	var ids []int
 	for _, v := range userChats {
 
@@ -220,13 +219,7 @@ func (s *ChatStorage) GetChats(rawUser []byte) ([]Chat, error) {
 		}
 		ids = append(ids, cid)
 	}
-	//	chatRow := s.DB.QueryRow("SELECT * FROM chats WHERE id=$1;", cid)
-	//	err = chatRow.Scan(&c.ID, &c.Name, &c.CreatedAt)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	chats = append(chats, c)
-	//}
+
 	chats := make([]Chat, 0)
 	chatRows, err := s.DB.Query("SELECT * FROM chats WHERE id = ANY($1) ORDER BY (SELECT created_at FROM messages WHERE chat_id=chats.id ORDER by created_at DESC LIMIT 1) DESC;", pq.Array(ids))
 	if err != nil {
