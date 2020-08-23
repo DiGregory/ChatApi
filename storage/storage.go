@@ -71,7 +71,7 @@ func (u User) validate() (error) {
 	return nil
 }
 
-func (s ChatStorage) AddChat(rawChat []byte) (*Chat, error) {
+func (s *ChatStorage) AddChat(rawChat []byte) (*Chat, error) {
 	var c Chat
 	err := json.Unmarshal(rawChat, &c)
 	if err != nil {
@@ -128,7 +128,7 @@ func (c Chat) validate(s ChatStorage) (error) {
 	return nil
 }
 
-func (s ChatStorage) AddMessage(rawMessage []byte) (*Message, error) {
+func (s *ChatStorage) AddMessage(rawMessage []byte) (*Message, error) {
 	var m Message
 	err := json.Unmarshal(rawMessage, &m)
 	if err != nil {
@@ -256,7 +256,7 @@ func (s *ChatStorage) GetChats(rawUser []byte) ([]Chat, error) {
 	return chats, nil
 }
 
-func (s ChatStorage) GetMessages(rawChat []byte) ([]Message, error) {
+func (s *ChatStorage) GetMessages(rawChat []byte) ([]Message, error) {
 	var msg Message
 	err := json.Unmarshal(rawChat, &msg)
 	fmt.Println(msg)
