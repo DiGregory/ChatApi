@@ -1,10 +1,11 @@
 package controllers
 
 import (
-	"net/http"
-	"github.com/DiGregory/avitoTech/storage"
 	"io/ioutil"
-	u "github.com/DiGregory/avitoTech/utils"
+	"net/http"
+
+	"github.com/DiGregory/ChatApi/storage"
+	u "github.com/DiGregory/ChatApi/utils"
 )
 
 func AddUser(w http.ResponseWriter, r *http.Request, s *storage.ChatStorage) {

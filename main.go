@@ -1,13 +1,14 @@
 package main
 
 import (
-	_ "github.com/lib/pq"
-	"log"
-	"github.com/DiGregory/avitoTech/storage"
-	"github.com/DiGregory/avitoTech/controllers"
-	"github.com/go-chi/chi"
-	"net/http"
 	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/DiGregory/ChatApi/controllers"
+	"github.com/DiGregory/ChatApi/storage"
+	"github.com/go-chi/chi"
+	_ "github.com/lib/pq"
 )
 
 type apiApp struct {

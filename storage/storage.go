@@ -2,13 +2,13 @@ package storage
 
 import (
 	"database/sql"
-	"os"
-	"io/ioutil"
-	"fmt"
 	"encoding/json"
 	"errors"
-	"strconv"
+	"fmt"
+	"io/ioutil"
 	"sort"
+	"strconv"
+
 	"github.com/lib/pq"
 )
 
@@ -21,18 +21,11 @@ func NewConn(driver, source string) (*ChatStorage, error) {
 	if err != nil {
 		return nil, err
 	}
-	initSQLFile, err := os.Open("./storage/init.sql")
+	initQuery, err := ioutil.ReadFile("./storage/init.sql")
 	if err != nil {
 		return nil, err
 	}
-	defer initSQLFile.Close()
-
-	initQuery, err := ioutil.ReadAll(initSQLFile)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = db.Query(string(initQuery))
+	_, err = db.Exec(string(initQuery))
 	if err != nil {
 		return nil, err
 	}
@@ -97,8 +90,7 @@ func (s *ChatStorage) AddChat(rawChat []byte) (*Chat, error) {
 		return nil, err
 	}
 	for _, v := range c.Users {
-		rows, err := tx.Query("INSERT INTO user_chats(chat_id,user_id) VALUES ($1,$2);", chat.ID, v)
-		rows.Close()
+		_, err := tx.Exec("INSERT INTO user_chats(chat_id,user_id) VALUES ($1,$2);", chat.ID, v)
 		if err != nil {
 			tx.Rollback()
 			return nil, err
@@ -109,7 +101,7 @@ func (s *ChatStorage) AddChat(rawChat []byte) (*Chat, error) {
 	return &chat, nil
 }
 
-func (c Chat) validate(s ChatStorage) (error) {
+func (c Chat) validate(s *ChatStorage) (error) {
 	if len(c.Name) == 0 {
 		return errors.New("invalid chat name")
 	}
@@ -152,7 +144,7 @@ func (s *ChatStorage) AddMessage(rawMessage []byte) (*Message, error) {
 
 }
 
-func (m Message) validate(s ChatStorage) (error) {
+func (m Message) validate(s *ChatStorage) (error) {
 	//check existing
 	userRow := s.DB.QueryRow("SELECT (id) FROM users WHERE id=$1;", m.UserID)
 	var user User
@@ -241,6 +233,7 @@ func (s *ChatStorage) GetChats(rawUser []byte) ([]Chat, error) {
 		if err != nil {
 			return nil, err
 		}
+		defer chatRows.Close()
 		userIDs := make([]string, 0)
 		for chatRows.Next() {
 			d := 0
